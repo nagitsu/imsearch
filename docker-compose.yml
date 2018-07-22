@@ -1,0 +1,58 @@
+version: '2'
+
+volumes:
+  elastic:
+  objects:
+
+services:
+
+  api:
+    build:
+      context: .
+      dockerfile: deploy/api.docker
+    links:
+      - elasticsearch
+    volumes:
+      - ./api:/api
+      - objects:/objects
+    env_file:
+      - deploy/api.env
+    ports:
+      - 5050:5050
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: deploy/frontend.docker
+    volumes:
+      - ./frontend:/frontend
+      - /frontend/node_modules
+    env_file:
+      - deploy/frontend.env
+    ports:
+      - 3000:3000
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.3.1
+    environment:
+      - cluster.name=imsearch-cluster
+      - xpack.security.enabled=false
+    volumes:
+      - elastic:/usr/share/elasticsearch/data/
+    ports:
+      - 9200:9200
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"

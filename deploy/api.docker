@@ -1,0 +1,34 @@
+FROM python:3.6
+
+# Install dependencies for psycopg2.
+RUN apt-get update && \
+    apt-get install -y \
+        libffi-dev \
+        libssl-dev \
+        locales \
+        python3-dev && \
+        apt-get purge -y --auto-remove && rm -rf /var/lib/apt/lists/*
+
+# Set up locale correctly.
+RUN locale-gen C.UTF-8
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+
+# Create the virtualenv.
+RUN python3 -m venv /appenv
+
+COPY api /api
+
+# Update the virtualenv's pip and setuptools, and install dependencies.
+RUN . /appenv/bin/activate && \
+    pip install -U pip && \
+    pip install -U setuptools && \
+    pip install uwsgi && \
+    pip install /api
+
+# Set up Luminoth by downloading the required checkpoints.
+RUN . /appenv/bin/activate && \
+    lumi checkpoint refresh && \
+    lumi checkpoint download accurate
+
+CMD /appenv/bin/uwsgi --ini /api/api.ini

@@ -1,0 +1,11 @@
+FROM node:8.2.1
+
+COPY frontend /frontend
+
+WORKDIR /frontend
+
+# Install the app dependencies.
+RUN yarn install
+
+# Defined in package.json.
+CMD ["yarn", "start"]

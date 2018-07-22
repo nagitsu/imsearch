@@ -1,0 +1,5 @@
+*.egg-info/
+*__pycache__/
+*.py[co]
+
+/frontend/node_modules/
